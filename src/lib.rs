@@ -8,6 +8,7 @@ pub mod metrics;
 pub mod mode;
 #[cfg(feature = "core")]
 pub mod server;
+pub mod tls;
 pub mod tracing;
 #[cfg(feature = "core")]
 pub mod worker;

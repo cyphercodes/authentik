@@ -78,15 +78,6 @@ fn main() -> Result<()> {
     trace!("installing error formatting");
     color_eyre::install()?;
 
-    trace!("installing rustls crypto provider");
-    #[expect(
-        clippy::unwrap_in_result,
-        reason = "result type does not implement Error"
-    )]
-    rustls::crypto::aws_lc_rs::default_provider()
-        .install_default()
-        .expect("Failed to install rustls provider");
-
     #[cfg(feature = "core")]
     if Mode::is_core() {
         trace!("initializing Python");
@@ -95,6 +86,9 @@ fn main() -> Result<()> {
     }
 
     ConfigManager::init()?;
+
+    trace!("installing rustls crypto provider");
+    authentik::tls::init()?;
 
     let _sentry = authentik::config::get()
         .error_reporting

@@ -1,6 +1,5 @@
-use std::{collections::HashMap, net::SocketAddr, num::NonZeroUsize, path::PathBuf};
+use std::{collections::HashMap, net::SocketAddr, num::NonZeroUsize};
 
-use ipnet::IpNet;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -8,8 +7,6 @@ pub struct Config {
     pub postgresql: PostgreSQLConfig,
 
     pub listen: ListenConfig,
-
-    pub http_timeout: u32,
 
     pub debug: bool,
     #[serde(default)]
@@ -20,28 +17,11 @@ pub struct Config {
 
     pub error_reporting: ErrorReportingConfig,
 
-    pub outposts: OutpostsConfig,
-
-    pub cookie_domain: Option<String>,
-
     pub compliance: ComplianceConfig,
-
-    pub blueprints_dir: PathBuf,
-    pub cert_discovery_dir: PathBuf,
 
     pub web: WebConfig,
 
     pub worker: WorkerConfig,
-
-    pub storage: StorageConfig,
-
-    // Outpost specific config
-    // These are only relevant for outposts, and cannot be set via YAML
-    // They are loaded via this config loader to support file:// schemas
-    pub authentik_host: Option<String>,
-    pub authentik_host_browser: Option<String>,
-    pub authentik_token: Option<String>,
-    pub authentik_insecure: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -66,13 +46,8 @@ pub struct PostgreSQLConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ListenConfig {
     pub http: Vec<SocketAddr>,
-    pub https: Vec<SocketAddr>,
-    pub ldap: Vec<SocketAddr>,
-    pub ldaps: Vec<SocketAddr>,
-    pub radius: Vec<SocketAddr>,
     pub metrics: Vec<SocketAddr>,
     pub debug_tokio: SocketAddr,
-    pub trusted_proxy_cidrs: Vec<IpNet>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -91,11 +66,6 @@ pub struct ErrorReportingConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct OutpostsConfig {
-    pub disable_embedded_outpost: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ComplianceConfig {
     pub fips: ComplianceFipsConfig,
 }
@@ -107,8 +77,6 @@ pub struct ComplianceFipsConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WebConfig {
-    pub workers: usize,
-    pub threads: usize,
     pub path: String,
     pub timeout_http_read_header: String,
     pub timeout_http_read: String,
@@ -119,28 +87,4 @@ pub struct WebConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WorkerConfig {
     pub processes: NonZeroUsize,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct StorageConfig {
-    pub backend: String,
-    pub file: StorageFileConfig,
-    pub media: Option<StorageOverrideConfig>,
-    pub reports: Option<StorageOverrideConfig>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct StorageFileConfig {
-    pub path: PathBuf,
-}
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct StorageOverrideConfig {
-    pub backend: Option<String>,
-    pub file: Option<StorageFileOverrideConfig>,
-}
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct StorageFileOverrideConfig {
-    pub path: Option<PathBuf>,
 }
