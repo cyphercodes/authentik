@@ -85,8 +85,9 @@ which = "8.0.2"
 opt-level = 3
 
 [profile.release]
-lto = true
 debug = 2
+lto = "fat"
+strip = true
 
 [workspace.lints.rust]
 ambiguous_negative_literals = "warn"
