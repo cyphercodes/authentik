@@ -7,9 +7,9 @@ from django.urls import reverse
 class TestRoot(TransactionTestCase):
     """Test root application"""
 
-    def test_monitoring_ok(self):
-        """Test monitoring with credentials"""
-        self.assertEqual(self.client.get(reverse("metrics")).status_code, 204)
+    def test_monitoring(self):
+        """Test monitoring"""
+        self.assertEqual(self.client.post(reverse("metrics")).status_code, 204)
 
     def test_monitoring_live(self):
         """Test LiveView"""

@@ -11,7 +11,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
-	"goauthentik.io/internal/config"
 	"goauthentik.io/internal/utils/sentry"
 	"goauthentik.io/internal/utils/unix"
 )
@@ -34,7 +33,7 @@ func (ws *WebServer) runMetricsServer() {
 		).ServeHTTP(rw, r)
 
 		// Get upstream metrics
-		re, err := http.NewRequest("GET", fmt.Sprintf("%s%s-/metrics/", ws.upstreamURL.String(), config.Get().Web.Path), nil)
+		re, err := http.NewRequest("POST", fmt.Sprintf("%s/-/metrics/", ws.upstreamURL.String()), nil)
 		if err != nil {
 			l.WithError(err).Warning("failed to get upstream metrics")
 			return
