@@ -229,7 +229,6 @@ data/
 source_docs/
 
 ### Golang ###
-authentik-server
 server
 ldap
 proxy

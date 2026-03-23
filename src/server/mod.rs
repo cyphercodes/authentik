@@ -44,14 +44,14 @@ impl Server {
 
         let server = if config::get().debug && which::which("authentik-server").is_err() {
             let build_status = Command::new("go")
-                .args(["build", "-o", "authentik-server", "./cmd/server"])
+                .args(["build", "-o", "server", "./cmd/server"])
                 .stdin(Stdio::null())
                 .status()
                 .await?;
             if !build_status.success() {
                 return Err(eyre!("golang server failed to compile"));
             }
-            Command::new("./authentik-server")
+            Command::new("./server")
                 .kill_on_drop(true)
                 .stdin(Stdio::null())
                 .stdout(Stdio::inherit())
