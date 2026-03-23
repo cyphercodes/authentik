@@ -10,7 +10,7 @@ struct EmptyCertResolver;
 
 #[expect(
     clippy::missing_trait_methods,
-    reason = "this is just a dummy implementatio to check FIPS compliance"
+    reason = "this is just a dummy implementation to check FIPS compliance"
 )]
 impl ResolvesServerCert for EmptyCertResolver {
     fn resolve(
