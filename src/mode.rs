@@ -5,7 +5,7 @@ use std::{
 };
 
 use eyre::{Result, eyre};
-use tracing::warn;
+use tracing::debug;
 
 static MODE: AtomicU8 = AtomicU8::new(0);
 
@@ -78,7 +78,7 @@ impl Mode {
     pub fn cleanup() {
         let mode_path = mode_path();
         if let Err(err) = std::fs::remove_file(&mode_path) {
-            warn!(%err, mode_path = %&mode_path.display(), "failed to remove mode file");
+            debug!(%err, mode_path = %&mode_path.display(), "failed to remove mode file");
         }
     }
 

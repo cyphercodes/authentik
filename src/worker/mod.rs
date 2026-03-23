@@ -25,7 +25,7 @@ use tokio::{
     signal::unix::SignalKind,
     sync::{Mutex, broadcast::error::RecvError},
 };
-use tracing::{info, trace, warn};
+use tracing::{debug, info, trace, warn};
 
 use crate::{
     arbiter::{Arbiter, Tasks},
@@ -181,12 +181,12 @@ impl Drop for Workers {
     fn drop(&mut self) {
         let socket_path = socket_path();
         if let Err(err) = std::fs::remove_file(&socket_path) {
-            warn!(%err, socket_path = %&socket_path.display(), "failed to remove socket");
+            debug!(%err, socket_path = %&socket_path.display(), "failed to remove socket");
         }
         if Mode::get() == Mode::Worker {
             let socket_path = crate::server::socket_path();
             if let Err(err) = std::fs::remove_file(&socket_path) {
-                warn!(%err, socket_path = %&socket_path.display(), "failed to remove socket");
+                debug!(%err, socket_path = %&socket_path.display(), "failed to remove socket");
             }
         }
     }

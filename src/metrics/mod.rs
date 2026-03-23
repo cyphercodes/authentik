@@ -4,7 +4,7 @@ use arc_swap::ArcSwapOption;
 use axum::{Router, routing::any};
 use eyre::Result;
 use metrics_exporter_prometheus::{PrometheusBuilder, PrometheusHandle};
-use tracing::{info, warn};
+use tracing::{debug, info};
 
 use crate::{
     arbiter::{Arbiter, Tasks},
@@ -48,7 +48,7 @@ impl Drop for Metrics {
     fn drop(&mut self) {
         let socket_path = socket_path();
         if let Err(err) = std::fs::remove_file(&socket_path) {
-            warn!(%err, socket_path = %&socket_path.display(), "failed to remove socket");
+            debug!(%err, socket_path = %&socket_path.display(), "failed to remove socket");
         }
     }
 }
