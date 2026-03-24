@@ -7,6 +7,7 @@ import "#elements/forms/ModalForm";
 import "@patternfly/elements/pf-tooltip/pf-tooltip.js";
 
 import { AndNext, DEFAULT_CONFIG } from "#common/api/config";
+import { docLink } from "#common/global";
 import { groupBy } from "#common/utils";
 
 import { PaginatedResponse, TableColumn } from "#elements/table/Table";
@@ -20,8 +21,6 @@ import { Flow, FlowsApi } from "@goauthentik/api";
 import { msg, str } from "@lit/localize";
 import { html, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
-
-import PFBanner from "@patternfly/patternfly/components/Banner/banner.css";
 
 @customElement("ak-flow-list")
 export class FlowListPage extends TablePage<Flow> {
@@ -37,8 +36,6 @@ export class FlowListPage extends TablePage<Flow> {
 
     @property()
     order = "slug";
-
-    static styles = [...super.styles, PFBanner];
 
     async apiEndpoint(): Promise<PaginatedResponse<Flow>> {
         return new FlowsApi(DEFAULT_CONFIG).flowsInstancesList(await this.defaultEndpointConfig());
@@ -142,14 +139,22 @@ export class FlowListPage extends TablePage<Flow> {
             <ak-forms-modal>
                 <span slot="submit">${msg("Import")}</span>
                 <span slot="header">${msg("Import Flow")}</span>
-                <div class="pf-c-banner pf-m-warning" slot="above-form">
-                    ${msg(
-                        "Warning: Flow imports are blueprint files, which may contain objects other than flows (such as users, policies, etc).",
-                    )}<br />${msg(
-                        "You should only import files from trusted sources and review blueprints before importing them.",
-                    )}
-                </div>
-                <ak-blueprint-import-form slot="form"> </ak-blueprint-import-form>
+                <ak-blueprint-import-form slot="form">
+                    <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href=${docLink("/add-secure-apps/flows-stages/flow/examples/flows/")}
+                        slot="read-more-link"
+                        >${msg("Flow Examples")}</a
+                    >
+                    <span slot="banner-warning">
+                        ${msg(
+                            "Warning: Flow imports are blueprint files, which may contain objects other than flows (such as users, policies, etc).",
+                        )}<br />${msg(
+                            "You should only import files from trusted sources and review blueprints before importing them.",
+                        )}
+                    </span>
+                </ak-blueprint-import-form>
                 <button slot="trigger" class="pf-c-button pf-m-primary">${msg("Import")}</button>
             </ak-forms-modal>
         `;

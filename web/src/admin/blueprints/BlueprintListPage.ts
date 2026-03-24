@@ -12,6 +12,7 @@ import "#elements/ak-mdx/ak-mdx";
 
 import { DEFAULT_CONFIG } from "#common/api/config";
 import { EVENT_REFRESH } from "#common/constants";
+import { docLink } from "#common/global";
 
 import { PaginatedResponse, TableColumn, Timestamp } from "#elements/table/Table";
 import { TablePage } from "#elements/table/TablePage";
@@ -213,7 +214,22 @@ export class BlueprintListPage extends TablePage<BlueprintInstance> {
             <ak-forms-modal>
                 <span slot="submit">${msg("Import")}</span>
                 <span slot="header">${msg("Import Blueprint")}</span>
-                <ak-blueprint-import-form slot="form"> </ak-blueprint-import-form>
+                <ak-blueprint-import-form slot="form">
+                    <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href=${docLink("/customize/blueprints/working_with_blueprints/")}
+                        slot="read-more-link"
+                        >${msg("Flow Examples")}</a
+                    >
+                    <span slot="banner-warning">
+                        ${msg(
+                            "Warning: Blueprint files may contain objects such as users, policies and expression.",
+                        )}<br />${msg(
+                            "You should only import files from trusted sources and review blueprints before importing them.",
+                        )}
+                    </span>
+                </ak-blueprint-import-form>
                 <button slot="trigger" class="pf-c-button pf-m-secondary">${msg("Import")}</button>
             </ak-forms-modal>
         `;

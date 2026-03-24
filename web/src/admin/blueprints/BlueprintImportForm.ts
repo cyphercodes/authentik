@@ -4,7 +4,6 @@ import "#elements/forms/HorizontalFormElement";
 import "#components/ak-toggle-group";
 
 import { DEFAULT_CONFIG } from "#common/api/config";
-import { docLink } from "#common/global";
 import { SentryIgnoredError } from "#common/sentry/index";
 
 import { Form } from "#elements/forms/Form";
@@ -24,11 +23,16 @@ import { msg } from "@lit/localize";
 import { CSSResult, html, nothing, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
+import PFBanner from "@patternfly/patternfly/components/Banner/banner.css";
 import PFDescriptionList from "@patternfly/patternfly/components/DescriptionList/description-list.css";
 
+/**
+ * @slot read-more-link Link for the read more text
+ * @slot banner-warning Warning text below file upload
+ */
 @customElement("ak-blueprint-import-form")
 export class BlueprintImportForm extends Form<ManagedBlueprintsImportCreateRequest> {
-    static styles: CSSResult[] = [...super.styles, PFDescriptionList];
+    static styles: CSSResult[] = [...super.styles, PFDescriptionList, PFBanner];
 
     @state()
     protected result: BlueprintImportResult | null = null;
@@ -123,19 +127,19 @@ export class BlueprintImportForm extends Form<ManagedBlueprintsImportCreateReque
                                       ".yaml files, which can be found in the Example Flows documentation",
                                   )}
                               </p>
-                              <p class="pf-c-form__helper-text">
-                                  ${msg("Read more about")}&nbsp;
-                                  <a
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      href=${docLink(
-                                          "/add-secure-apps/flows-stages/flow/examples/flows/",
-                                      )}
-                                      >${msg("Flow Examples")}</a
-                                  >
-                              </p>
+                              ${this.hasSlotted("read-more-link")
+                                  ? html`<p class="pf-c-form__helper-text">
+                                        ${msg("Read more about")}&nbsp;
+                                        <slot name="read-more-link"></slot>
+                                    </p>`
+                                  : nothing}
                           </div>
                       </ak-form-element-horizontal>
+                      ${this.hasSlotted("banner-warning")
+                          ? html`<div class="pf-c-banner pf-m-warning" slot="above-form">
+                                <slot name="banner-warning"></slot>
+                            </div>`
+                          : nothing}
                   `
                 : nothing}
             ${this.source === BlueprintSource.File
