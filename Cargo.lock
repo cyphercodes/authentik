@@ -1685,7 +1685,7 @@ dependencies = [
 [[package]]
 name = "json-subscriber"
 version = "0.2.7"
-source = "git+https://github.com/rissson/json-subscriber.git?rev=950ad7cb887a0a14fd5cb8afb8e76db1f456c032#950ad7cb887a0a14fd5cb8afb8e76db1f456c032"
+source = "git+https://github.com/mladedav/json-subscriber.git?rev=ebed80ed06a843a4b68af34494f72de35b3239d2#ebed80ed06a843a4b68af34494f72de35b3239d2"
 dependencies = [
  "serde",
  "serde_json",

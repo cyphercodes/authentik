@@ -39,7 +39,7 @@ tracing-subscriber = { version = "0.3.23", features = [
   "tracing-log",
 ] }
 # See https://github.com/mladedav/json-subscriber/pull/23
-json-subscriber = { git = "https://github.com/rissson/json-subscriber.git", rev = "950ad7cb887a0a14fd5cb8afb8e76db1f456c032" }
+json-subscriber = { git = "https://github.com/mladedav/json-subscriber.git", rev = "ebed80ed06a843a4b68af34494f72de35b3239d2" }
 metrics = "0.24.3"
 metrics-exporter-prometheus = { version = "0.18.1", default-features = false }
 nix = { version = "0.31.2", features = ["hostname", "signal"] }

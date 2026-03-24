@@ -48,4 +48,4 @@ name = "aws-lc-rs"
 exact = true
 
 [sources]
-allow-git = ["https://github.com/rissson/json-subscriber.git"]
+allow-git = ["https://github.com/mladedav/json-subscriber.git"]
