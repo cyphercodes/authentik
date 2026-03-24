@@ -43,7 +43,7 @@ class Device(InternallyManagedMixin, ExpiringModel, AttributesMixin, PolicyBindi
         return f"goauthentik.io/endpoints/devices/{self.device_uuid}/facts"
 
     @property
-    def cached_facts(self) -> "DeviceFactSnapshot":
+    def cached_facts(self) -> DeviceFactSnapshot:
         if cached := cache.get(self.cache_key_facts):
             return cached
         facts = self.facts
@@ -51,7 +51,7 @@ class Device(InternallyManagedMixin, ExpiringModel, AttributesMixin, PolicyBindi
         return facts
 
     @property
-    def facts(self) -> "DeviceFactSnapshot":
+    def facts(self) -> DeviceFactSnapshot:
         data = {}
         last_updated = datetime.fromtimestamp(0, UTC)
         for snapshot_data, snapshort_created in DeviceFactSnapshot.filter_not_expired(
@@ -157,13 +157,16 @@ class Connector(ScheduledModel, SerializerModel):
         raise NotImplementedError
 
     @property
-    def controller(self) -> type["BaseController[Connector]"]:
+    def controller(self) -> type[BaseController[Connector]]:
         raise NotImplementedError
 
     @property
     def schedule_specs(self) -> list[ScheduleSpec]:
+        from authentik.endpoints.controller import Capabilities
         from authentik.endpoints.tasks import endpoints_sync
 
+        if Capabilities.ENROLL_AUTOMATIC_API not in self.controller(self).capabilities():
+            return []
         return [
             ScheduleSpec(
                 actor=endpoints_sync,
@@ -175,7 +178,7 @@ class Connector(ScheduledModel, SerializerModel):
         ]
 
 
-class DeviceAccessGroup(SerializerModel, PolicyBindingModel):
+class DeviceAccessGroup(AttributesMixin, SerializerModel, PolicyBindingModel):
 
     name = models.TextField(unique=True)
 
@@ -205,7 +208,7 @@ class EndpointStage(Stage):
     mode = models.TextField(choices=StageMode.choices, default=StageMode.OPTIONAL)
 
     @property
-    def view(self) -> type["StageView"]:
+    def view(self) -> type[StageView]:
         from authentik.endpoints.stage import EndpointStageView
 
         return EndpointStageView
