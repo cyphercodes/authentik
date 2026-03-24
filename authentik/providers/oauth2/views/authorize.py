@@ -45,7 +45,7 @@ from authentik.flows.stage import PLAN_CONTEXT_PENDING_USER_IDENTIFIER, StageVie
 from authentik.lib.utils.time import timedelta_from_string
 from authentik.lib.views import bad_request_message
 from authentik.policies.types import PolicyRequest
-from authentik.policies.views import BufferedPolicyAccessView, RequestValidationError
+from authentik.policies.views import PolicyAccessView, RequestValidationError
 from authentik.providers.oauth2.errors import (
     AuthorizeError,
     ClientIdError,
@@ -338,7 +338,7 @@ class OAuthAuthorizationParams:
         return code
 
 
-class AuthorizationFlowInitView(BufferedPolicyAccessView):
+class AuthorizationFlowInitView(PolicyAccessView):
     """OAuth2 Flow initializer, checks access to application and starts flow"""
 
     params: OAuthAuthorizationParams
@@ -432,7 +432,7 @@ class AuthorizationFlowInitView(BufferedPolicyAccessView):
         return response
 
     def dispatch(self, request: HttpRequest, *args, **kwargs):
-        # Activate language before parsing params (error messages should be localised)
+        # Activate language before parsing params (error messages should be localized)
         return self.dispatch_with_language(request, *args, **kwargs)
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
