@@ -4,7 +4,12 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.fields import BooleanField, CharField, DateTimeField
+from rest_framework.fields import (
+    BooleanField,
+    CharField,
+    DateTimeField,
+    FileField,
+)
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -20,8 +25,13 @@ from authentik.core.api.used_by import UsedByMixin
 from authentik.core.api.utils import JSONDictField, ModelSerializer, PassiveSerializer
 from authentik.core.models import User
 from authentik.events.logs import LogEventSerializer
-from authentik.lib.utils.file import FileUploadSerializer
 from authentik.rbac.decorators import permission_required
+
+
+class BlueprintUploadSerializer(PassiveSerializer):
+    """Serializer to upload file"""
+
+    file = FileField(required=False)
 
 
 class ManagedSerializer:
@@ -171,7 +181,7 @@ class BlueprintInstanceViewSet(UsedByMixin, ModelViewSet):
         return self.retrieve(request, *args, **kwargs)
 
     @extend_schema(
-        request={"multipart/form-data": FileUploadSerializer},
+        request={"multipart/form-data": BlueprintUploadSerializer},
         responses={
             204: BlueprintImportResultSerializer,
             400: BlueprintImportResultSerializer,

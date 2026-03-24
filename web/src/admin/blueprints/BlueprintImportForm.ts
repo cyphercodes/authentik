@@ -8,6 +8,8 @@ import { SentryIgnoredError } from "#common/sentry/index";
 
 import { Form } from "#elements/forms/Form";
 
+import { AKLabel } from "#components/ak-label";
+
 import { BlueprintImportResult, Flow, ManagedApi } from "@goauthentik/api";
 
 import { msg } from "@lit/localize";
@@ -18,14 +20,20 @@ import PFDescriptionList from "@patternfly/patternfly/components/DescriptionList
 
 @customElement("ak-blueprint-import-form")
 export class BlueprintImportForm extends Form<Flow> {
+    static styles: CSSResult[] = [...super.styles, PFDescriptionList];
+
     @state()
-    result?: BlueprintImportResult;
+    protected result: BlueprintImportResult | null = null;
+
+    public override reset(): void {
+        super.reset();
+
+        this.result = null;
+    }
 
     getSuccessMessage(): string {
         return msg("Successfully imported blueprint.");
     }
-
-    static styles: CSSResult[] = [...super.styles, PFDescriptionList];
 
     async send(): Promise<BlueprintImportResult> {
         const file = this.files().get("blueprint");
@@ -65,21 +73,40 @@ export class BlueprintImportForm extends Form<Flow> {
         `;
     }
 
-    renderForm(): TemplateResult {
-        return html`<ak-form-element-horizontal label=${msg("Blueprint")} name="blueprint">
-                <input type="file" value="" class="pf-c-form-control" />
-                <p class="pf-c-form__helper-text">
-                    ${msg(".yaml files, which can be found in the Example Flows documentation")}
-                </p>
-                <p class="pf-c-form__helper-text">
-                    ${msg("See more here:")}&nbsp;
-                    <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href=${docLink("/add-secure-apps/flows-stages/flow/examples/flows/")}
-                        >${msg("Documentation")}</a
-                    >
-                </p>
+    protected override renderForm(): TemplateResult {
+        return html`<ak-form-element-horizontal name="blueprint">
+                ${AKLabel(
+                    {
+                        slot: "label",
+                        className: "pf-c-form__group-label",
+                        htmlFor: "blueprint",
+                    },
+                    msg("Blueprint"),
+                )}
+
+                <input
+                    type="file"
+                    value=""
+                    class="pf-c-form-control"
+                    id="blueprint"
+                    name="blueprint"
+                    aria-describedby="blueprint-help"
+                />
+
+                <div id="blueprint-help">
+                    <p class="pf-c-form__helper-text">
+                        ${msg(".yaml files, which can be found in the Example Flows documentation")}
+                    </p>
+                    <p class="pf-c-form__helper-text">
+                        ${msg("Read more about")}&nbsp;
+                        <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href=${docLink("/add-secure-apps/flows-stages/flow/examples/flows/")}
+                            >${msg("Flow Examples")}</a
+                        >
+                    </p>
+                </div>
             </ak-form-element-horizontal>
             ${this.result ? this.renderResult() : nothing}`;
     }
