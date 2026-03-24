@@ -94,23 +94,29 @@ class AuthenticatorWebAuthnChallengeResponse(ChallengeResponse):
             registration,
             exists_query=Q(credential_id=bytes_to_base64url(registration.credential_id)),
         )
+        stage: AuthenticatorWebAuthnStage = self.stage.executor.current_stage
 
-        att_stmt = parse_attestation_object(registration.attestation_object).att_stmt
-        if att_stmt.x5c and len(att_stmt.x5c) > 0:
-            cert = load_der_x509_certificate(att_stmt.x5c[0])
+        att_obj = parse_attestation_object(registration.attestation_object)
+        if (
+            att_obj
+            and att_obj.att_stmt
+            and att_obj.att_stmt.x5c is not None
+            and len(att_obj.att_stmt.x5c) > 0
+        ):
+            cert = load_der_x509_certificate(att_obj.att_stmt.x5c[0])
             registration_data.attest_cert = cert.public_bytes(
                 encoding=Encoding.PEM,
             ).decode("utf-8")
             registration_data.attest_cert_fingerprint = fingerprint_sha256(cert)
-            registration_data.exists_query |= Q(
-                attestation_certificate_fingerprint=registration_data.attest_cert_fingerprint
-            )
+            if stage.prevent_duplicate_devices:
+                registration_data.exists_query |= Q(
+                    attestation_certificate_fingerprint=registration_data.attest_cert_fingerprint
+                )
 
         credential_id_exists = WebAuthnDevice.objects.filter(registration_data.exists_query).first()
         if credential_id_exists:
             raise ValidationError("Credential ID already exists.")
 
-        stage: AuthenticatorWebAuthnStage = self.stage.executor.current_stage
         aaguid = registration.aaguid
         allowed_aaguids = stage.device_type_restrictions.values_list("aaguid", flat=True)
         if allowed_aaguids.exists():
