@@ -35919,6 +35919,9 @@ components:
         file:
           type: string
           format: binary
+        path:
+          type: string
+          minLength: 1
     Brand:
       type: object
       description: Brand Serializer

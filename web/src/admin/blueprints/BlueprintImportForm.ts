@@ -1,6 +1,7 @@
 import "#components/ak-status-label";
 import "#elements/events/LogViewer";
 import "#elements/forms/HorizontalFormElement";
+import "#components/ak-toggle-group";
 
 import { DEFAULT_CONFIG } from "#common/api/config";
 import { docLink } from "#common/global";
@@ -10,7 +11,14 @@ import { Form } from "#elements/forms/Form";
 
 import { AKLabel } from "#components/ak-label";
 
-import { BlueprintImportResult, Flow, ManagedApi } from "@goauthentik/api";
+import { BlueprintSource } from "#admin/blueprints/BlueprintForm";
+
+import {
+    BlueprintFile,
+    BlueprintImportResult,
+    ManagedApi,
+    ManagedBlueprintsImportCreateRequest,
+} from "@goauthentik/api";
 
 import { msg } from "@lit/localize";
 import { CSSResult, html, nothing, TemplateResult } from "lit";
@@ -19,15 +27,19 @@ import { customElement, state } from "lit/decorators.js";
 import PFDescriptionList from "@patternfly/patternfly/components/DescriptionList/description-list.css";
 
 @customElement("ak-blueprint-import-form")
-export class BlueprintImportForm extends Form<Flow> {
+export class BlueprintImportForm extends Form<ManagedBlueprintsImportCreateRequest> {
     static styles: CSSResult[] = [...super.styles, PFDescriptionList];
 
     @state()
     protected result: BlueprintImportResult | null = null;
 
+    @state()
+    protected source: BlueprintSource = BlueprintSource.Upload;
+
     public override reset(): void {
         super.reset();
 
+        this.source = BlueprintSource.Upload;
         this.result = null;
     }
 
@@ -35,14 +47,15 @@ export class BlueprintImportForm extends Form<Flow> {
         return msg("Successfully imported blueprint.");
     }
 
-    async send(): Promise<BlueprintImportResult> {
-        const file = this.files().get("blueprint");
-        if (!file) {
-            throw new SentryIgnoredError("No form data");
+    async send(data: ManagedBlueprintsImportCreateRequest): Promise<BlueprintImportResult> {
+        if (this.source === BlueprintSource.Upload) {
+            const file = this.files().get("blueprint");
+            if (!file) {
+                throw new SentryIgnoredError("No form data");
+            }
+            data.file = file;
         }
-        const result = await new ManagedApi(DEFAULT_CONFIG).managedBlueprintsImportCreate({
-            file: file,
-        });
+        const result = await new ManagedApi(DEFAULT_CONFIG).managedBlueprintsImportCreate(data);
         if (!result.success) {
             this.result = result;
             throw new SentryIgnoredError("Failed to import blueprint");
@@ -74,40 +87,83 @@ export class BlueprintImportForm extends Form<Flow> {
     }
 
     protected override renderForm(): TemplateResult {
-        return html`<ak-form-element-horizontal name="blueprint">
-                ${AKLabel(
-                    {
-                        slot: "label",
-                        className: "pf-c-form__group-label",
-                        htmlFor: "blueprint",
-                    },
-                    msg("Blueprint"),
-                )}
+        return html` <ak-toggle-group
+                value=${this.source}
+                @ak-toggle=${(ev: CustomEvent<{ value: BlueprintSource }>) => {
+                    this.source = ev.detail.value;
+                }}
+            >
+                <option value=${BlueprintSource.Upload}>${msg("File upload")}</option>
+                <option value=${BlueprintSource.File}>${msg("Local path")}</option>
+            </ak-toggle-group>
+            ${this.source === BlueprintSource.Upload
+                ? html`
+                      <ak-form-element-horizontal name="blueprint">
+                          ${AKLabel(
+                              {
+                                  slot: "label",
+                                  className: "pf-c-form__group-label",
+                                  htmlFor: "blueprint",
+                              },
+                              msg("Blueprint"),
+                          )}
 
-                <input
-                    type="file"
-                    value=""
-                    class="pf-c-form-control"
-                    id="blueprint"
-                    name="blueprint"
-                    aria-describedby="blueprint-help"
-                />
+                          <input
+                              type="file"
+                              value=""
+                              class="pf-c-form-control"
+                              id="blueprint"
+                              name="blueprint"
+                              aria-describedby="blueprint-help"
+                          />
 
-                <div id="blueprint-help">
-                    <p class="pf-c-form__helper-text">
-                        ${msg(".yaml files, which can be found in the Example Flows documentation")}
-                    </p>
-                    <p class="pf-c-form__helper-text">
-                        ${msg("Read more about")}&nbsp;
-                        <a
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            href=${docLink("/add-secure-apps/flows-stages/flow/examples/flows/")}
-                            >${msg("Flow Examples")}</a
-                        >
-                    </p>
-                </div>
-            </ak-form-element-horizontal>
+                          <div id="blueprint-help">
+                              <p class="pf-c-form__helper-text">
+                                  ${msg(
+                                      ".yaml files, which can be found in the Example Flows documentation",
+                                  )}
+                              </p>
+                              <p class="pf-c-form__helper-text">
+                                  ${msg("Read more about")}&nbsp;
+                                  <a
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      href=${docLink(
+                                          "/add-secure-apps/flows-stages/flow/examples/flows/",
+                                      )}
+                                      >${msg("Flow Examples")}</a
+                                  >
+                              </p>
+                          </div>
+                      </ak-form-element-horizontal>
+                  `
+                : nothing}
+            ${this.source === BlueprintSource.File
+                ? html`<ak-form-element-horizontal label=${msg("Path")} name="path">
+                      <ak-search-select
+                          .fetchObjects=${async (query?: string): Promise<BlueprintFile[]> => {
+                              const items = await new ManagedApi(
+                                  DEFAULT_CONFIG,
+                              ).managedBlueprintsAvailableList();
+                              return items.filter((item) =>
+                                  query ? item.path.includes(query) : true,
+                              );
+                          }}
+                          .renderElement=${(item: BlueprintFile): string => {
+                              const name = item.path;
+                              if (item.meta && item.meta.name) {
+                                  return `${name} (${item.meta.name})`;
+                              }
+                              return name;
+                          }}
+                          .value=${(item: BlueprintFile | null) => {
+                              return item?.path;
+                          }}
+                          blankable
+                      >
+                      </ak-search-select>
+                  </ak-form-element-horizontal>`
+                : nothing}
             ${this.result ? this.renderResult() : nothing}`;
     }
 }

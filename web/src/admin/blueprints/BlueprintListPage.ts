@@ -212,7 +212,7 @@ export class BlueprintListPage extends TablePage<BlueprintInstance> {
             </ak-forms-modal>
             <ak-forms-modal>
                 <span slot="submit">${msg("Import")}</span>
-                <span slot="header">${msg("Import Flow")}</span>
+                <span slot="header">${msg("Import Blueprint")}</span>
                 <ak-blueprint-import-form slot="form"> </ak-blueprint-import-form>
                 <button slot="trigger" class="pf-c-button pf-m-secondary">${msg("Import")}</button>
             </ak-forms-modal>
