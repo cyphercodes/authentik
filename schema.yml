@@ -28869,10 +28869,6 @@ paths:
         explode: true
         style: form
       - in: query
-        name: friendly_name
-        schema:
-          type: string
-      - in: query
         name: max_attempts
         schema:
           type: integer
@@ -28889,11 +28885,6 @@ paths:
           - preferred
           - required
       - $ref: '#/components/parameters/QuerySearch'
-      - in: query
-        name: stage_uuid
-        schema:
-          type: string
-          format: uuid
       - in: query
         name: user_verification
         schema:
@@ -33509,7 +33500,7 @@ paths:
           $ref: '#/components/responses/ValidationErrorResponse'
         '403':
           $ref: '#/components/responses/GenericErrorResponse'
-  /tasks/workers:
+  /tasks/workers/:
     get:
       operationId: tasks_workers_list
       description: Get currently connected worker count.
@@ -35489,6 +35480,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/UserVerificationEnum'
           description: Enforce user verification for WebAuthn devices.
+        webauthn_hints:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebAuthnHintEnum'
         webauthn_allowed_device_types:
           type: array
           items:
@@ -35539,6 +35534,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/UserVerificationEnum'
           description: Enforce user verification for WebAuthn devices.
+        webauthn_hints:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebAuthnHintEnum'
         webauthn_allowed_device_types:
           type: array
           items:
@@ -35685,7 +35684,11 @@ components:
           - $ref: '#/components/schemas/AuthenticatorAttachmentEnum'
           nullable: true
         resident_key_requirement:
-          $ref: '#/components/schemas/ResidentKeyRequirementEnum'
+          $ref: '#/components/schemas/UserVerificationEnum'
+        hints:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebAuthnHintEnum'
         device_type_restrictions:
           type: array
           items:
@@ -35731,7 +35734,11 @@ components:
           - $ref: '#/components/schemas/AuthenticatorAttachmentEnum'
           nullable: true
         resident_key_requirement:
-          $ref: '#/components/schemas/ResidentKeyRequirementEnum'
+          $ref: '#/components/schemas/UserVerificationEnum'
+        hints:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebAuthnHintEnum'
         device_type_restrictions:
           type: array
           items:
@@ -36997,19 +37004,26 @@ components:
         flags:
           type: object
           properties:
+            core_default_app_access:
+              type: boolean
+              description: Configure if applications without any policy/group/user
+                bindings should be accessible to any user.
             enterprise_audit_include_expanded_diff:
               type: boolean
-            policies_buffered_access_view:
-              type: boolean
+              description: Include additional information in audit logs, may incur
+                a performance penalty.
             flows_continuous_login:
               type: boolean
+              description: Upon successful authentication, re-start authentication
+                in other open tabs.
             flows_refresh_others:
               type: boolean
+              description: Refresh other tabs after successful authentication.
           required:
+          - core_default_app_access
           - enterprise_audit_include_expanded_diff
           - flows_continuous_login
           - flows_refresh_others
-          - policies_buffered_access_view
           readOnly: true
       required:
       - branding_custom_css
@@ -43556,6 +43570,12 @@ components:
         webhook_url:
           type: string
           format: uri
+        webhook_ca:
+          type: string
+          format: uuid
+          nullable: true
+          description: When set, the selected ceritifcate is used to validate the
+            certificate of the webhook server.
         webhook_mapping_body:
           type: string
           format: uuid
@@ -43599,6 +43619,12 @@ components:
         webhook_url:
           type: string
           format: uri
+        webhook_ca:
+          type: string
+          format: uuid
+          nullable: true
+          description: When set, the selected ceritifcate is used to validate the
+            certificate of the webhook server.
         webhook_mapping_body:
           type: string
           format: uuid
@@ -47682,6 +47708,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/UserVerificationEnum'
           description: Enforce user verification for WebAuthn devices.
+        webauthn_hints:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebAuthnHintEnum'
         webauthn_allowed_device_types:
           type: array
           items:
@@ -47709,7 +47739,11 @@ components:
           - $ref: '#/components/schemas/AuthenticatorAttachmentEnum'
           nullable: true
         resident_key_requirement:
-          $ref: '#/components/schemas/ResidentKeyRequirementEnum'
+          $ref: '#/components/schemas/UserVerificationEnum'
+        hints:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebAuthnHintEnum'
         device_type_restrictions:
           type: array
           items:
@@ -49301,6 +49335,12 @@ components:
         webhook_url:
           type: string
           format: uri
+        webhook_ca:
+          type: string
+          format: uuid
+          nullable: true
+          description: When set, the selected ceritifcate is used to validate the
+            certificate of the webhook server.
         webhook_mapping_body:
           type: string
           format: uuid
@@ -50752,19 +50792,26 @@ components:
         flags:
           type: object
           properties:
+            core_default_app_access:
+              type: boolean
+              description: Configure if applications without any policy/group/user
+                bindings should be accessible to any user.
             enterprise_audit_include_expanded_diff:
               type: boolean
-            policies_buffered_access_view:
-              type: boolean
+              description: Include additional information in audit logs, may incur
+                a performance penalty.
             flows_continuous_login:
               type: boolean
+              description: Upon successful authentication, re-start authentication
+                in other open tabs.
             flows_refresh_others:
               type: boolean
+              description: Refresh other tabs after successful authentication.
           required:
+          - core_default_app_access
           - enterprise_audit_include_expanded_diff
           - flows_continuous_login
           - flows_refresh_others
-          - policies_buffered_access_view
     PatchedSourceStageRequest:
       type: object
       description: SourceStage Serializer
@@ -53336,12 +53383,6 @@ components:
           minimum: -2147483648
       required:
       - name
-    ResidentKeyRequirementEnum:
-      enum:
-      - discouraged
-      - preferred
-      - required
-      type: string
     Review:
       type: object
       description: |-
@@ -55462,19 +55503,26 @@ components:
         flags:
           type: object
           properties:
+            core_default_app_access:
+              type: boolean
+              description: Configure if applications without any policy/group/user
+                bindings should be accessible to any user.
             enterprise_audit_include_expanded_diff:
               type: boolean
-            policies_buffered_access_view:
-              type: boolean
+              description: Include additional information in audit logs, may incur
+                a performance penalty.
             flows_continuous_login:
               type: boolean
+              description: Upon successful authentication, re-start authentication
+                in other open tabs.
             flows_refresh_others:
               type: boolean
+              description: Refresh other tabs after successful authentication.
           required:
+          - core_default_app_access
           - enterprise_audit_include_expanded_diff
           - flows_continuous_login
           - flows_refresh_others
-          - policies_buffered_access_view
       required:
       - flags
     SettingsRequest:
@@ -55543,19 +55591,26 @@ components:
         flags:
           type: object
           properties:
+            core_default_app_access:
+              type: boolean
+              description: Configure if applications without any policy/group/user
+                bindings should be accessible to any user.
             enterprise_audit_include_expanded_diff:
               type: boolean
-            policies_buffered_access_view:
-              type: boolean
+              description: Include additional information in audit logs, may incur
+                a performance penalty.
             flows_continuous_login:
               type: boolean
+              description: Upon successful authentication, re-start authentication
+                in other open tabs.
             flows_refresh_others:
               type: boolean
+              description: Refresh other tabs after successful authentication.
           required:
+          - core_default_app_access
           - enterprise_audit_include_expanded_diff
           - flows_continuous_login
           - flows_refresh_others
-          - policies_buffered_access_view
       required:
       - flags
     SeverityEnum:
@@ -58429,6 +58484,12 @@ components:
       required:
       - aaguid
       - description
+    WebAuthnHintEnum:
+      enum:
+      - security-key
+      - client-device
+      - hybrid
+      type: string
     Worker:
       type: object
       properties:
