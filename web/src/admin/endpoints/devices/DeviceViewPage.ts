@@ -18,7 +18,7 @@ import { Timestamp } from "#elements/table/shared";
 import { setPageDetails } from "#components/ak-page-navbar";
 import renderDescriptionList, { DescriptionPair } from "#components/DescriptionList";
 
-import { getSize, osFamilyToLabel } from "#admin/endpoints/devices/utils";
+import { getSize, osFamilyToLabel, trySortNumerical } from "#admin/endpoints/devices/utils";
 
 import { DeviceConnection, Disk, EndpointDeviceDetails, EndpointsApi } from "@goauthentik/api";
 
@@ -246,7 +246,7 @@ export class DeviceViewPage extends AKElement {
             return nothing;
         }
         return html`<ak-endpoints-device-process-table
-            .items=${this.device?.facts.data.processes}
+            .items=${(this.device?.facts.data.processes || []).sort(trySortNumerical)}
         ></ak-endpoints-device-process-table>`;
     }
 
@@ -255,7 +255,7 @@ export class DeviceViewPage extends AKElement {
             return nothing;
         }
         return html`<ak-endpoints-device-users-table
-            .items=${this.device?.facts.data.users}
+            .items=${(this.device?.facts.data.users || []).sort(trySortNumerical)}
         ></ak-endpoints-device-users-table>`;
     }
 
@@ -264,7 +264,7 @@ export class DeviceViewPage extends AKElement {
             return nothing;
         }
         return html`<ak-endpoints-device-groups-table
-            .items=${this.device?.facts.data.groups}
+            .items=${(this.device?.facts.data.groups || []).sort(trySortNumerical)}
         ></ak-endpoints-device-groups-table>`;
     }
 
