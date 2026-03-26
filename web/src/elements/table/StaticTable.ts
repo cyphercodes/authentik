@@ -13,10 +13,7 @@ export abstract class StaticTable<T extends object> extends Table<T> {
     items?: T[] = [];
 
     protected override async apiEndpoint(): Promise<PaginatedResponse<T, object>> {
-        if (!this.items) {
-            return createPaginatedResponse([]);
-        }
-        return createPaginatedResponse(this.items);
+        return createPaginatedResponse(this.items ?? []);
     }
 
     protected override renderToolbar(): SlottedTemplateResult {
