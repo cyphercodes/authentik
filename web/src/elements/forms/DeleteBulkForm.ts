@@ -26,9 +26,6 @@ export class DeleteObjectsTable<T extends object> extends StaticTable<T> {
     static styles: CSSResult[] = [...super.styles, PFList];
 
     @property({ attribute: false })
-    public objects: T[] = [];
-
-    @property({ attribute: false })
     public metadata: (item: T) => BulkDeleteMetadata = (item: T) => {
         const metadata: BulkDeleteMetadata = [];
         if ("name" in item) {
@@ -50,7 +47,7 @@ export class DeleteObjectsTable<T extends object> extends StaticTable<T> {
 
     @state()
     protected get columns(): TableColumn[] {
-        return this.metadata(this.objects[0]).map((element) => [element.key]);
+        return this.metadata(this.items![0]).map((element) => [element.key]);
     }
 
     protected row(item: T): SlottedTemplateResult[] {
