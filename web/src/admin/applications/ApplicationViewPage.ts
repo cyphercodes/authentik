@@ -23,6 +23,7 @@ import {
     Application,
     ContentTypeEnum,
     CoreApi,
+    ModelEnum,
     OutpostsApi,
     RbacPermissionsAssignedByRolesListModelEnum,
 } from "@goauthentik/api";
@@ -321,7 +322,7 @@ export class ApplicationViewPage extends WithLicenseSummary(AKElement) {
                             </div>
                             <div class="pf-c-card__body">
                                 ${this.application &&
-                                html` <ak-charts-application-authorize
+                                html`<ak-charts-application-authorize
                                     application-id=${this.application.pk}
                                 >
                                 </ak-charts-application-authorize>`}
@@ -329,14 +330,11 @@ export class ApplicationViewPage extends WithLicenseSummary(AKElement) {
                         </div>
                         <div class="pf-c-card pf-l-grid__item pf-m-12-col">
                             <div class="pf-c-card__title">${msg("Changelog")}</div>
-                            <div class="pf-c-card__body">
-                                <ak-object-changelog
-                                    targetModelPk=${this.application.pk || ""}
-                                    targetModelApp="authentik_core"
-                                    targetModelName="application"
-                                >
-                                </ak-object-changelog>
-                            </div>
+                            <ak-object-changelog
+                                targetModelPk=${this.application.pk || ""}
+                                targetModelName=${ModelEnum.AuthentikCoreApplication}
+                            >
+                            </ak-object-changelog>
                         </div>
                     </div>
                 </section>

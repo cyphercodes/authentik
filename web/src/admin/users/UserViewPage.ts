@@ -464,9 +464,7 @@ export class UserViewPage extends WithBrandConfig(WithCapabilitiesConfig(WithSes
                     class="pf-c-page__main-section pf-m-no-padding-mobile"
                 >
                     <div class="pf-c-card">
-                        <div class="pf-c-card__body">
-                            <ak-events-user targetUser=${this.user.username}> </ak-events-user>
-                        </div>
+                        <ak-events-user targetUser=${this.user.username}> </ak-events-user>
                     </div>
                 </div>
                 <div

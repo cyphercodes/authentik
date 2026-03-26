@@ -246,7 +246,7 @@ export class DeviceViewPage extends AKElement {
             return nothing;
         }
         return html`<ak-endpoints-device-process-table
-            .device=${this.device}
+            .items=${this.device?.facts.data.processes}
         ></ak-endpoints-device-process-table>`;
     }
 
@@ -255,7 +255,7 @@ export class DeviceViewPage extends AKElement {
             return nothing;
         }
         return html`<ak-endpoints-device-users-table
-            .device=${this.device}
+            .items=${this.device?.facts.data.users}
         ></ak-endpoints-device-users-table>`;
     }
 
@@ -264,7 +264,7 @@ export class DeviceViewPage extends AKElement {
             return nothing;
         }
         return html`<ak-endpoints-device-groups-table
-            .device=${this.device}
+            .items=${this.device?.facts.data.groups}
         ></ak-endpoints-device-groups-table>`;
     }
 
@@ -273,7 +273,9 @@ export class DeviceViewPage extends AKElement {
             return nothing;
         }
         return html`<ak-endpoints-device-software-table
-            .device=${this.device}
+            .items=${(this.device?.facts.data.software || []).sort((a, b) =>
+                a.name.localeCompare(b.name),
+            )}
         ></ak-endpoints-device-software-table>`;
     }
 

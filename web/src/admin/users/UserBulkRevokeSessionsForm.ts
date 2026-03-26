@@ -1,6 +1,7 @@
 import "#elements/buttons/SpinnerButton/index";
 
 import { DEFAULT_CONFIG } from "#common/api/config";
+import { createPaginatedResponse } from "#common/api/responses";
 import { EVENT_REFRESH } from "#common/constants";
 import { MessageLevel } from "#common/messages";
 
@@ -44,18 +45,7 @@ export class UserBulkRevokeSessionsTable extends Table<User> {
         }
         this.requestUpdate();
 
-        return Promise.resolve({
-            pagination: {
-                count: this.objects.length,
-                current: 1,
-                totalPages: 1,
-                startIndex: 1,
-                endIndex: this.objects.length,
-                next: 0,
-                previous: 0,
-            },
-            results: this.objects,
-        });
+        return createPaginatedResponse(this.objects);
     }
 
     protected override rowLabel(item: User): string | null {
