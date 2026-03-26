@@ -52,7 +52,7 @@ export class FlowMultitabController implements ReactiveController {
         const next = qs.get("next");
         if (next) {
             const url = new URL(next, window.location.origin);
-            if (url.origin !== window.location.origin) {
+            if (!url.pathname.startsWith(`${globalAK().api.relBase}if/flow`)) {
                 multiTabOrchestrateLeave();
             }
             window.location.assign(url);
