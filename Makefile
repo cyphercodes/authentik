@@ -15,7 +15,6 @@ else
 	SED_INPLACE = sed -i
 endif
 
-GEN_API_TS = gen-ts-api
 GEN_API_PY = gen-py-api
 
 BREW_LDFLAGS :=
@@ -135,7 +134,7 @@ core-i18n-extract:
 		--no-obsolete \
 		--ignore web \
 		--ignore internal \
-		--ignore ${GEN_API_TS} \
+		--ignore packages/client-ts \
 		--ignore website \
 		-l en
 
@@ -211,10 +210,6 @@ gen-diff:  ## (Release) generate the changelog diff between the current schema a
 	$(SED_INPLACE) 's/}/&#125;/g' diff.md
 	npx prettier --write diff.md
 
-gen-clean-ts:  ## Remove generated API client for TypeScript
-	rm -rf ${PWD}/${GEN_API_TS}/
-	rm -rf ${PWD}/web/node_modules/@goauthentik/api/
-
 gen-clean-py:  ## Remove generated API client for Python
 	rm -rf ${PWD}/${GEN_API_PY}
 
@@ -223,24 +218,13 @@ gen-clean: gen-clean-ts gen-clean-py  ## Remove generated API clients
 gen-client-go:  ## Build and install the authentik API for Golang
 	make -C "${PWD}/packages/client-go" build
 
-gen-client-rust:
+gen-client-rust:  ## Build and install the authentik API for Rust
 	make -C "${PWD}/packages/client-rust" build version=${NPM_VERSION}
 	make lint-fix-rust
 
-gen-client-ts: gen-clean-ts  ## Build and install the authentik API for Typescript into the authentik UI Application
-	docker compose -f scripts/api/compose.yml run --rm --user "${UID}:${GID}" gen \
-		generate \
-		-i /local/schema.yml \
-		-g typescript-fetch \
-		-o /local/${GEN_API_TS} \
-		-c /local/scripts/api/ts-config.yaml \
-		--additional-properties=npmVersion=${NPM_VERSION} \
-		--git-repo-id authentik \
-		--git-user-id goauthentik
-
-	cd ${PWD}/${GEN_API_TS} && npm i
-	cd ${PWD}/${GEN_API_TS} && npm link
-	cd ${PWD}/web && npm link @goauthentik/api
+gen-client-ts:  ## Build and install the authentik API for Typescript into the authentik UI Application
+	make -C "${PWD}/packages/client-ts" build
+	npm --prefix web install
 
 gen-client-py: gen-clean-py ## Build and install the authentik API for Python
 	mkdir -p ${PWD}/${GEN_API_PY}
@@ -248,10 +232,14 @@ gen-client-py: gen-clean-py ## Build and install the authentik API for Python
 	cp ${PWD}/schema.yml ${PWD}/${GEN_API_PY}
 	make -C ${PWD}/${GEN_API_PY} build version=${NPM_VERSION}
 
+_gen-clients: gen-client-go gen-client-rust gen-client-ts
+gen-clients:  ## Build and install API clients used by authentik
+	$(MAKE) _gen-clients -j
+
+gen: gen-build gen-clients  ## Build and install API schema and clients used by authentik
+
 gen-dev-config:  ## Generate a local development config file
 	$(UV) run scripts/generate_config.py
-
-gen: gen-build gen-client-go gen-client-rust gen-client-ts
 
 #########################
 ## Node.js
@@ -332,7 +320,6 @@ docs-api-clean: ## Clean generated API documentation
 #########################
 
 docker:  ## Build a docker image of the current source tree
-	mkdir -p ${GEN_API_TS}
 	DOCKER_BUILDKIT=1 docker build . -f lifecycle/container/Dockerfile --progress plain --tag ${DOCKER_IMAGE}
 
 test-docker:
